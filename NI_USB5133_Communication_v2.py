@@ -285,15 +285,21 @@ def waveform_save(wf_buffer,wf_info,path='C:\\Users\\Public\\Documents',prefix='
 # return:
     tuple of waveform data (int8 numpy array) and waveform information (pandas)
 '''
-def waveform_open(path,prefix):
+def waveform_open(path,prefix, os):
     
     # load waveform info into pandas data frame, get number of samples per channel and total number of channels
-    wf_info = pd.read_excel(f'{path}\\{prefix}_wfinfo.xlsx')
+    if os == "mac":
+        wf_info = pd.read_excel(f'{path}/{prefix}_wfinfo.xlsx')
+    elif os == "windows":
+        wf_info = pd.read_excel(f'{path}\\{prefix}_wfinfo.xlsx')
     samples = int(wf_info.at[0,'samples'])
     channels = int(wf_info.shape[0])
     
     # load waveform data into numpy array, reshape
-    wf_buffer = np.fromfile(f'{path}\\{prefix}_wf.bin',dtype='int8')
+    if os == "mac":
+        wf_buffer = np.fromfile(f'{path}/{prefix}_wf.bin',dtype='int8')
+    elif os == "windows":
+        wf_buffer = np.fromfile(f'{path}\\{prefix}_wf.bin',dtype='int8')
     wf_buffer = wf_buffer.reshape(channels,samples)
     
     return (wf_buffer,wf_info)

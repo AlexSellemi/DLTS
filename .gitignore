@@ -1,0 +1,12 @@
+# Ignore the virtual environment folder
+venv/
+
+# Ignore compiled Python files 
+__pycache__/
+*.pyc
+
+# Ignore a specific file with secrets
+config.env
+
+# Ignore all user text notes
+*.txt
