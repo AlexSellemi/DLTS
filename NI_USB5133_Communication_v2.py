@@ -38,6 +38,7 @@ import numpy as np
 import time
 import pandas as pd
 from matplotlib import pyplot as plt
+import pathlib
 
 '''
 # determine the number of samples per acquisition
@@ -133,12 +134,13 @@ def config5133_single(session,vpp0,vpp1,t,sr=100e6,tc=20e-9,offset0=0,offset1=0,
     session.channels[0].configure_vertical(range=volt_range_ch0, coupling=niscope.VerticalCoupling.DC, offset=volt_offset_ch0, probe_attenuation=1, enabled=True)
     session.channels[1].configure_vertical(range=volt_range_ch1, coupling=niscope.VerticalCoupling.DC, offset=volt_offset_ch1, probe_attenuation=1, enabled=True)
     
-    # configure horizontal parameters
-    session.configure_horizontal_timing(min_sample_rate=sr, min_num_pts=samples, ref_position=0, num_records=1, enforce_realtime=True) # configure horizontal parameters: sampling rate, number of points to acquire per acquisition, position of reference event in the waveform in percentage, number of acquisitions to record, enforce realtime or not
+    # configure horizontal parameters: sampling rate, number of points to acquire per acquisition, position of reference event in the waveform in percentage, number of acquisitions to record, enforce realtime or not
+    session.configure_horizontal_timing(min_sample_rate=sr, min_num_pts=samples, ref_position=0, num_records=1, enforce_realtime=True)
+    
     
     # If user wants to configure this internally:
     # configure trigger: immediately triggered after session initiation
-    session.configure_trigger_immediate()
+    # session.configure_trigger_immediate()
 
     # If user wants to configure this internally:
     # session.configure_trigger_edge(trigger_source="0", level=0.1, trigger_coupling=niscope.TriggerCoupling.DC)
@@ -285,21 +287,17 @@ def waveform_save(wf_buffer,wf_info,path='C:\\Users\\Public\\Documents',prefix='
 # return:
     tuple of waveform data (int8 numpy array) and waveform information (pandas)
 '''
-def waveform_open(path,prefix, os):
+def waveform_open(path,prefix):
     
     # load waveform info into pandas data frame, get number of samples per channel and total number of channels
-    if os == "mac":
-        wf_info = pd.read_excel(f'{path}/{prefix}_wfinfo.xlsx')
-    elif os == "windows":
-        wf_info = pd.read_excel(f'{path}\\{prefix}_wfinfo.xlsx')
+    base_path = pathlib.Path(path)
+    wf_info = pd.read_excel(base_path / f'{prefix}_wfinfo.xlsx')
+    # wf_info = pd.read_excel(f'{prefix}_wfinfo.xlsx')
     samples = int(wf_info.at[0,'samples'])
     channels = int(wf_info.shape[0])
-    
-    # load waveform data into numpy array, reshape
-    if os == "mac":
-        wf_buffer = np.fromfile(f'{path}/{prefix}_wf.bin',dtype='int8')
-    elif os == "windows":
-        wf_buffer = np.fromfile(f'{path}\\{prefix}_wf.bin',dtype='int8')
+
+    wf_buffer = np.fromfile(base_path / f'{prefix}_wf.bin',dtype='int8')
+    # wf_buffer = np.fromfile(f'{prefix}_wf.bin',dtype='int8')
     wf_buffer = wf_buffer.reshape(channels,samples)
     
     return (wf_buffer,wf_info)
@@ -531,4 +529,3 @@ def exe5133_continuous(session,samples,save=True,path='C:\\Users\\Public\\Docume
         return (wf_buffer,wf_info)
     else:
         return None
-   

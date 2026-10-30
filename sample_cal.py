@@ -1,0 +1,1 @@
+# Acquire thermal properties of sample by gathering thermocouple voltage vs. time graphs for different variac voltage settings
